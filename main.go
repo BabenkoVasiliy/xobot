@@ -2,9 +2,12 @@ package main
 
 import (
 	"log"
+	"strconv"
 
 	"github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
+
+var gameState = make(map[int64]bool)
 
 func main() {
 	botToken := "8669066608:AAHQeaPBVCT_khKKTWSEZsDXWe7pAWjuoMo"
@@ -27,18 +30,35 @@ func main() {
 
 	for update := range updates {
 		if update.Message != nil {
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выбери режим игры:")
-			msg.ReplyMarkup = kb
+			chatID := update.Message.Chat.ID
+			text := update.Message.Text
 
-			bot.Send(msg)
-			log.Printf("Sent keyboard to chat %d", update.Message.Chat.ID)
+			if text == "Играть с ботом" {
+				gameState[chatID] = true
+
+				btn := tgbotapi.NewInlineKeyboardButtonWebApp("Играть", "https://BabenkoVasiliy.github.io/")
+				kbInline := tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(btn))
+
+				msg := tgbotapi.NewMessage(chatID, "Нажми кнопку ниже чтобы начать игру:")
+				msg.ReplyMarkup = kbInline
+				bot.Send(msg)
+			} else if text == "Найти соперника" {
+				msg := tgbotapi.NewMessage(chatID, "Поиск соперника временно недоступен")
+				bot.Send(msg)
+			} else {
+				msg := tgbotapi.NewMessage(chatID, "Выбери режим игры:")
+				msg.ReplyMarkup = kb
+				bot.Send(msg)
+			}
 		}
 
 		if update.CallbackQuery != nil {
 			callback := tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data)
 			bot.Request(callback)
 
-			log.Printf("Callback: %s", update.CallbackQuery.Data)
+			log.Printf("Callback from %d: %s", update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data)
 		}
 	}
+
+	_ = strconv.Mkinter
 }
