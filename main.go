@@ -14,19 +14,31 @@ func main() {
 		log.Panic(err)
 	}
 
-	bot.Debug = false
-
 	log.Printf("Authorized on account %s", bot.Self.UserName)
+
+	kb := tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton("Найти соперника"),
+			tgbotapi.NewKeyboardButton("Играть с ботом"),
+		),
+	)
 
 	updates := bot.GetUpdatesChan(tgbotapi.NewUpdate(0))
 
 	for update := range updates {
 		if update.Message != nil {
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-			msg.ReplyToMessageID = update.Message.MessageID
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Выбери режим игры:")
+			msg.ReplyMarkup = kb
 
 			bot.Send(msg)
-			log.Printf("Echo: %s", update.Message.Text)
+			log.Printf("Sent keyboard to chat %d", update.Message.Chat.ID)
+		}
+
+		if update.CallbackQuery != nil {
+			callback := tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data)
+			bot.Request(callback)
+
+			log.Printf("Callback: %s", update.CallbackQuery.Data)
 		}
 	}
 }
