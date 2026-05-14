@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"strconv"
 
 	"github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -26,6 +25,8 @@ func main() {
 		),
 	)
 
+	webAppURL := "https://BabenkoVasiliy.github.io/"
+
 	updates := bot.GetUpdatesChan(tgbotapi.NewUpdate(0))
 
 	for update := range updates {
@@ -36,7 +37,7 @@ func main() {
 			if text == "Играть с ботом" {
 				gameState[chatID] = true
 
-				btn := tgbotapi.NewInlineKeyboardButtonWebApp("Играть", "https://BabenkoVasiliy.github.io/")
+				btn := tgbotapi.NewInlineKeyboardButtonURL("🎮 Играть", webAppURL)
 				kbInline := tgbotapi.NewInlineKeyboardMarkup(tgbotapi.NewInlineKeyboardRow(btn))
 
 				msg := tgbotapi.NewMessage(chatID, "Нажми кнопку ниже чтобы начать игру:")
@@ -59,6 +60,4 @@ func main() {
 			log.Printf("Callback from %d: %s", update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data)
 		}
 	}
-
-	_ = strconv.Mkinter
 }
